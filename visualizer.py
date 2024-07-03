@@ -4,12 +4,12 @@ import plotly.graph_objects as go
 import random
 
 class Visualizer:
-    def __init__(self, df):
-        self.df = df
-
+    def __init__(self, state_data):
+        self.state_data = state_data
+#function for unemployment rate by state graph
     def plot_unemployment_rate_by_state(self):
         fig = px.bar(
-            self.df,
+            self.state_data,
             x='State/Area',
             y='Percent (%) of Labor Force Unemployed in State/Area',
             animation_frame='Year',
@@ -26,11 +26,11 @@ class Visualizer:
             title_x=0.5
         )
         return fig
-
+#function for unemployment rate trends
     def plot_unemployment_rate_trends(self):
-        self.df['Date'] = pd.to_datetime(self.df[['Year', 'Month']].assign(DAY=1))
+        self.state_data['Date'] = pd.to_datetime(self.state_data[['Year', 'Month']].assign(DAY=1))
         fig = px.line(
-            self.df,
+            self.state_data,
             x='Date',
             y='Percent (%) of Labor Force Unemployed in State/Area',
             color='State/Area',
@@ -45,11 +45,11 @@ class Visualizer:
             hovermode="x unified"
         )
         return fig
-
+#function for employment vs unemployment
     def plot_employment_vs_unemployment(self, sample_fraction=0.1):
-        df_sampled = self.df.sample(frac=sample_fraction, random_state=42)
+        state_data_sampled = self.state_data.sample(frac=sample_fraction, random_state=42)
         fig = px.scatter(
-            df_sampled,
+            state_data_sampled,
             x='Total Employment in State/Area',
             y='Total Unemployment in State/Area',
             color='State/Area',
@@ -64,7 +64,7 @@ class Visualizer:
             title_x=0.5
         )
         return fig
-
+#function for average unemployment indicator graph
     def plot_avg_unemployment_indicator(self):
         # Generate data
         years = list(range(1980, 2024))
@@ -76,20 +76,20 @@ class Visualizer:
                 data['State'].append(state)
                 data['Total Unemployment'].append(random.randint(50000, 1500000))
 
-        df = pd.DataFrame(data)
+        state_data = pd.DataFrame(data)
 
         # Function to update the indicator
         def update_indicator(year):
-            filtered_df = df[df['Year'] == year]
-            avg_unemployment = filtered_df['Total Unemployment'].mean()
+            filtered_state_data = state_data[state_data['Year'] == year]
+            avg_unemployment = filtered_state_data['Total Unemployment'].mean()
             return avg_unemployment
 
-        # Create the indicator figure
+        # Creating the indicator
         fig = go.Figure(go.Indicator(
             mode="number+gauge+delta",
             gauge={'shape': "bullet"},
-            delta={'reference': df['Total Unemployment'].mean() }, # Reference for the delta mode
-            value=update_indicator(years[0]), # Initial the value (first year)
+            delta={'reference': state_data['Total Unemployment'].mean() }, 
+            value=update_indicator(years[0]), 
             domain={'x': [0.3, 1], 'y': [0.2, 0.9]},
             title={'text': "Average Employment"}
         ))
@@ -101,13 +101,13 @@ class Visualizer:
                     buttons=list([
                         dict(label=str(year),
                              method="update",
-                             args=[{"value": update_indicator(year)}])  # Update value on dropdown changes
+                             args=[{"value": update_indicator(year)}])  
                         for year in years
                     ]),
                     direction="down",
                     pad={"r": 10, "t": 10},
                     showactive=True,
-                    x=0.1,  # Adjust dropdown position as per requirements
+                    x=0.1, 
                     y=1.1
                 ),
             ]
@@ -115,7 +115,7 @@ class Visualizer:
         fig.update_layout(title="Year to Year Unemployment Difference in USA")
 
         return fig
-
+# function for total unemployment over time 
     def plot_total_unemployment_over_time(self):
         # Generate data
         years = list(range(1980, 2024))
@@ -127,13 +127,13 @@ class Visualizer:
                 data['State'].append(state)
                 data['Total Unemployment'].append(random.randint(50000, 1500000))
 
-        df = pd.DataFrame(data)
+        state_data = pd.DataFrame(data)
 
         fig = go.Figure()
 
         for state in states:
-            df_state = df[df['State'] == state]
-            fig.add_trace(go.Scatter(x=df_state['Year'], y=df_state['Total Unemployment'],
+            state_data_state = state_data[state_data['State'] == state]
+            fig.add_trace(go.Scatter(x=state_data_state['Year'], y=state_data_state['Total Unemployment'],
                                      mode='lines+markers', name=state))
 
         fig.update_layout(title="Total Unemployment in Major States Over Time",

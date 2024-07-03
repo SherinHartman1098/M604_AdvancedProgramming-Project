@@ -3,17 +3,17 @@ import pandas as pd
 class DataHandler:
     def __init__(self, filepath):
         self.filepath = filepath
-        self.df = None
+        self.state_data = None
 
     def load_data(self):
-        self.df = pd.read_csv(self.filepath)
+        self.state_data = pd.read_csv(self.filepath)
         #self._map_state_abbreviations()
         self._drop_unused_columns()
         self._drop_duplicates_and_na()
-        return self.df
+        return self.state_data
 
     def _map_state_abbreviations(self):
-        if self.df is not None:
+        if self.state_data is not None:
             states_abbreviation = {
                 "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR",
                 "California": "CA", "Colorado": "CO", "Connecticut": "CT", "Delaware": "DE",
@@ -29,30 +29,30 @@ class DataHandler:
                 "Vermont": "VT", "Virginia": "VA", "Washington": "WA", "West Virginia": "WV",
                 "Wisconsin": "WI", "Wyoming": "WY"
             }
-            self.df['State Abbreviation'] = self.df['State/Area'].map(states_abbreviation)
+            self.state_data['State Abbreviation'] = self.state_data['State/Area'].map(states_abbreviation)
 
     def _drop_unused_columns(self):
-        if self.df is not None:
-            self.df = self.df.drop(columns=['FIPS Code'])
+        if self.state_data is not None:
+            self.state_data = self.state_data.drop(columns=['FIPS Code'])
 
     def _drop_duplicates_and_na(self):
-        if self.df is not None:
-            self.df.drop_duplicates(keep='last', inplace=True)
-            self.df.dropna(inplace=True)
+        if self.state_data is not None:
+            self.state_data.drop_duplicates(keep='last', inplace=True)
+            self.state_data.dropna(inplace=True)
 
     def filter_data(self, start_date=None, end_date=None, states=None):
-        if self.df is None:
+        if self.state_data is None:
             return None
         
-        df_filtered = self.df.copy()
+        state_data_filtered = self.state_data.copy()
 
         if start_date and end_date:
-            df_filtered['Date'] = pd.to_datetime(df_filtered[['Year', 'Month']].assign(DAY=1))
+            state_data_filtered['Date'] = pd.to_datetime(state_data_filtered[['Year', 'Month']].assign(DAY=1))
             start_date = pd.to_datetime(start_date)
             end_date = pd.to_datetime(end_date)
-            df_filtered = df_filtered[(df_filtered['Date'] >= start_date) & (df_filtered['Date'] <= end_date)]
+            state_data_filtered = state_data_filtered[(state_data_filtered['Date'] >= start_date) & (state_data_filtered['Date'] <= end_date)]
         
         if states:
-            df_filtered = df_filtered[df_filtered['State/Area'].isin(states)]
+            state_data_filtered = state_data_filtered[state_data_filtered['State/Area'].isin(states)]
         
-        return df_filtered
+        return state_data_filtered
